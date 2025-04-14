@@ -1,0 +1,184 @@
+##
+# You should look at the following URL's in order to grasp a solid understanding
+# of Nginx configuration files in order to fully unleash the power of Nginx.
+# https://www.nginx.com/resources/wiki/start/
+# https://www.nginx.com/resources/wiki/start/topics/tutorials/config_pitfalls/
+# https://wiki.debian.org/Nginx/DirectoryStructure
+#
+# In most cases, administrators will remove this file from sites-enabled/ and
+# leave it as reference inside of sites-available where it will continue to be
+# updated by the nginx packaging team.
+#
+# This file will automatically load configuration files provided by other
+# applications, such as Drupal or Wordpress. These applications will be made
+# available underneath a path with that package name, such as /drupal8.
+#
+# Please see /usr/share/doc/nginx-doc/examples/ for more detailed examples.
+##
+
+upstream backend {
+    server localhost:8000;
+    keepalive 10240;
+}
+
+upstream frontend {
+    server localhost:3000;
+    keepalive 10240;
+}
+
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        root /app/dist;
+        index index.html;
+        server_name uat.nxhk;
+
+        # Cloned from SalesfloorAdmin of Prod
+        location ~ \.php$ {
+              include snippets/fastcgi-php.conf;
+              fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        }
+
+        # Uat
+        location ^~ /public/ {
+                alias /var/www/html/backend/public/;
+        }
+
+        location ^~ /uploads/ {
+                ## In uat, /var/www/html/backend/public/uploads -> /home/ubuntu/code/nxhk/backend/storage/app/public/uploads
+                # alias /var/www/html/backend/public/uploads/;
+                alias /var/www/html/backend/public/storage/uploads/;
+        }
+
+        location ^~ /export_csv/ {
+                alias /var/www/html/backend/public/export_csv/;
+        }
+
+
+        # 修改 /v1 位置块
+        location ^~ /v1 {
+            proxy_pass http://backend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_http_version 1.1;
+            proxy_set_header Connection "";
+        }
+
+        # 修改 /adminer481.php 位置块
+        location ^~ /adminer481.php {
+            root /var/www/html/backend/public;
+            include snippets/fastcgi-php.conf;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        }
+
+        location / {
+                try_files $uri $uri/ /index.html @frontend_proxy;
+        }
+
+        # let 404 error to frontend
+        # ref. to frontend/src/router/errors.js
+        error_page 403 /403;
+        error_page 404 /404;
+        error_page 500 /500;
+
+        location @frontend_proxy {
+            proxy_pass http://frontend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_http_version 1.1;
+            proxy_set_header Connection "";
+        }
+}
+
+# Default server configuration
+#
+server {
+        listen 8080 default_server;
+        listen [::]:8080 default_server;
+
+        root /app/dist;
+
+        index index.html index.php index.htm index.nginx-debian.html;
+
+        server_name dev.uat.nxhk;
+
+        location ~ \.php$ {
+              include snippets/fastcgi-php.conf;
+              fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        }
+
+        location ^~ /public/ {
+                alias /var/www/html/backend/public/;
+        }
+
+        location ^~ /uploads/ {
+                ## In uat, /var/www/html/backend/public/uploads -> /home/ubuntu/code/nxhk/backend/storage/app/public/uploads
+                alias /var/www/html/backend/public/uploads/;
+        }
+
+        location ^~ /export_csv/ {
+                alias /var/www/html/backend/public/export_csv/;
+        }
+
+        location ^~ /v1 {
+            proxy_pass http://backend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_http_version 1.1;
+            proxy_set_header Connection "";
+        }
+
+        location ^~ /adminer481.php {
+            root /var/www/html/backend/public;
+            include snippets/fastcgi-php.conf;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        }
+
+        location / {
+            root /app/dist;
+            index index.html;
+            try_files $uri /$uri @frontend_proxy;
+        }
+
+        error_page 403 /403;
+        error_page 404 /404;
+        error_page 500 /500;
+
+        location @frontend_proxy {
+            proxy_pass http://frontend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_http_version 1.1;
+            proxy_set_header Connection "";
+        }
+
+}
+
+# Virtual Host configuration for example.com
+#
+# You can move that to a different file under sites-available/ and symlink that
+# to sites-enabled/ to enable it.
+#
+#server {
+#       listen 80;
+#       listen [::]:80;
+#
+#       server_name example.com;
+#
+#       root /var/www/example.com;
+#       index index.html;
+#
+#       location / {
+#               try_files $uri $uri/ =404;
+#       }
+#}

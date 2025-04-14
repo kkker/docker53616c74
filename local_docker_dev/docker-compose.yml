@@ -1,0 +1,120 @@
+name: demo_dev
+# docker-compose -f docker-compose.yml up --build --force-recreate -d
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dev
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: demo_dev
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+      # REDIS_USERNAME: admin
+      # REDIS_PASSWORD: adminpass
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: pass
+    volumes:
+      # - ../backend:/var/www/html/backend # for adminer481.php
+      # - ../frontend/dist:/var/www/html/frontend # for adminer481.php
+      - ..:/home/ubuntu/code/demo
+      # - ../frontend:/app
+      - ./mysql/data:/var/lib/mysql # for mysql
+      - sail-redis:/data # for redis
+    ports:
+      # for backend
+      - "80:80" # frontend: npm built in dist, via nginx
+      - "8080:8080" # for webpack dev server via nginx
+      - "8000:8000" # for php artisan serve
+      - "9102:9102" # for doc
+      - "9109:9109" # for timer via socket.io
+      - "9229:9229" # for timer inspector
+      # for frontend
+      # - "3080:80" # for nginx to preview dist, after build:prod
+      - "3000:3000" # for webpack dev server
+      - "15672:15672" # for rabbitmq management
+      # for mysql
+      - "3306:3306"
+      # for redis
+      - '${FORWARD_REDIS_PORT:-6379}:6379'
+      # for rabbitmq server
+      - "5672:5672"
+    networks:
+      - demo_dev_network
+    # depends_on:
+    #   - mysql
+    #   - redis
+    #   - rabbitmq
+
+  # mysql:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile4mysql
+  #   container_name: dev_mysql
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
+  #     MYSQL_DATABASE: demo_dev
+  #     MYSQL_USER: myuser
+  #     MYSQL_PASSWORD: mypassword
+  #   volumes:
+  #     - ./mysql/data:/var/lib/mysql
+  #     - ..:/home/ubuntu/code/demo
+  #   ports:
+  #     - "3306:3306"
+  #   networks:
+  #     - demo_dev_network
+
+
+  # redis:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile4redis
+  #   container_name: dev_redis
+  #   volumes:
+  #       - 'sail-redis:/data'
+  #       - ..:/home/ubuntu/code/demo
+  #   ports:
+  #     - '${FORWARD_REDIS_PORT:-6379}:6379'
+  #   # environment:
+  #     # REDIS_USERNAME: admin
+  #     # REDIS_PASSWORD: adminpass
+  #   networks:
+  #     - demo_dev_network
+  #   healthcheck:
+  #     ## both user and password
+  #     # cli: redis-cli --user admin --pass adminpass ping
+  #     # test: ["CMD", "redis-cli", "--user", "admin", "--pass", "adminpass", "ping"]
+  #     ## password only
+  #     # cli: redis-cli -a adminpass ping
+  #     # test: ["CMD", "redis-cli", "-a", "adminpass", "ping"]
+  #     ## no password
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     retries: 3
+  #     timeout: 5s
+
+
+  # rabbitmq:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile4rabbitmq
+  #   container_name: dev_rabbitmq
+  #   ports:
+  #     # - "15672:15672" # for rabbitmq management, But disabled by dev nginx is listen 15672;.
+  #     - "5672:5672" # for rabbitmq server
+  #   environment:
+  #     # TZ: Asia/Hong_Kong
+  #     RABBITMQ_DEFAULT_USER: php
+  #     RABBITMQ_DEFAULT_PASS: php
+  #   networks:
+  #     - demo_dev_network
+
+networks:
+  demo_dev_network:
+    driver: bridge
+
+
+volumes:
+  sail-redis:
+    driver: local
+
