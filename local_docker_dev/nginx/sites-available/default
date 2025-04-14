@@ -31,7 +31,7 @@ server {
         listen [::]:80 default_server;
         root /app/dist;
         index index.html;
-        server_name uat.nxhk;
+        server_name uat.demo;
 
         # Cloned from SalesfloorAdmin of Prod
         location ~ \.php$ {
@@ -45,7 +45,7 @@ server {
         }
 
         location ^~ /uploads/ {
-                ## In uat, /var/www/html/backend/public/uploads -> /home/ubuntu/code/nxhk/backend/storage/app/public/uploads
+                ## In uat, /var/www/html/backend/public/uploads -> /home/ubuntu/code/demo/backend/storage/app/public/uploads
                 # alias /var/www/html/backend/public/uploads/;
                 alias /var/www/html/backend/public/storage/uploads/;
         }
@@ -105,7 +105,7 @@ server {
 
         index index.html index.php index.htm index.nginx-debian.html;
 
-        server_name dev.uat.nxhk;
+        server_name dev.uat.demo;
 
         location ~ \.php$ {
               include snippets/fastcgi-php.conf;
@@ -117,7 +117,7 @@ server {
         }
 
         location ^~ /uploads/ {
-                ## In uat, /var/www/html/backend/public/uploads -> /home/ubuntu/code/nxhk/backend/storage/app/public/uploads
+                ## In uat, /var/www/html/backend/public/uploads -> /home/ubuntu/code/demo/backend/storage/app/public/uploads
                 alias /var/www/html/backend/public/uploads/;
         }
 

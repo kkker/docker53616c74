@@ -2,7 +2,7 @@
 set -x
 
 MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
-MYSQL_DATABASE=${MYSQL_DATABASE:-nxhk_uat}
+MYSQL_DATABASE=${MYSQL_DATABASE:-demo_uat}
 MYSQL_USER=${MYSQL_USER:-myuser}
 MYSQL_PASSWORD=${MYSQL_PASSWORD:-mypassword}
 
@@ -22,17 +22,17 @@ uat_mysql() { # aka. function uat_mysql
 
 
     local do_mysql_init=false
-    local is_mysql_initialized_file=/home/ubuntu/code/nxhk/uat/mysql/data.initialized
+    local is_mysql_initialized_file=/home/ubuntu/code/demo/local_docker_dev/mysql/data.initialized
     local mysql_data_path=$( cd "$(dirname "$is_mysql_initialized_file")" ; pwd -P )
     local mysql_data_file=$( basename "$is_mysql_initialized_file" )
     echo "The initialized path: $mysql_data_path"
     echo "The initialized file: $mysql_data_file"
     # for check mysql initialized file exists, that is generated at end of mysql-init execution.
     if [[ $(find $mysql_data_path -name $mysql_data_file -print -quit | wc -l) -gt 0 ]]; then
-        echo "The initialized file, /home/ubuntu/code/nxhk/uat/mysql/data.initialized has found"
+        echo "The initialized file, /home/ubuntu/code/demo/local_docker_dev/mysql/data.initialized has found"
         /etc/init.d/mysql restart
     else
-        echo "The initialized file, /home/ubuntu/code/nxhk/uat/mysql/data.initialized Not Found"
+        echo "The initialized file, /home/ubuntu/code/demo/local_docker_dev/mysql/data.initialized Not Found"
         do_mysql_init=true
         mysqld --initialize-insecure --user=mysql && sleep 10 && /etc/init.d/mysql restart
     fi
@@ -134,7 +134,7 @@ fi # EOF if [ "$1" = 'uat_rabbitmq' ]
 function uat_script {
 
     # For upload files, ref. to backend/config/filesystems.php
-    cd /home/ubuntu/code/nxhk/backend && php artisan storage:link
+    cd /home/ubuntu/code/demo/backend && php artisan storage:link
 
     service php8.3-fpm start
     service cron start
@@ -163,7 +163,7 @@ fi
 function demo_script {
 
     # For upload files, ref. to backend/config/filesystems.php
-    cd /home/ubuntu/code/nxhk/backend && php artisan storage:link
+    cd /home/ubuntu/code/demo/backend && php artisan storage:link
 
     service php8.3-fpm start
     service cron start

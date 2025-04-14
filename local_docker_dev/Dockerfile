@@ -126,9 +126,9 @@ COPY sudoers.d/* /etc/sudoers.d/
 RUN chmod 0440 /etc/sudoers.d/*
 
 # Made symbolic links in UAT
-RUN ln -s /home/ubuntu/code/nxhk/backend /var/www/html/backend
-RUN ln -s /home/ubuntu/code/nxhk/frontend /var/www/html/frontend
-RUN ln -s /home/ubuntu/code/nxhk/frontend /app
+RUN ln -s /home/ubuntu/code/demo/backend /var/www/html/backend
+RUN ln -s /home/ubuntu/code/demo/frontend /var/www/html/frontend
+RUN ln -s /home/ubuntu/code/demo/frontend /app
 
 RUN usermod -aG ubuntu www-data
 
@@ -139,7 +139,7 @@ COPY nginx/sites-available/rabbitmq.conf /etc/nginx/sites-available/
 RUN ln -s /etc/nginx/sites-available/rabbitmq.conf /etc/nginx/sites-enabled/
 
 
-RUN echo "* * * * * root cd /home/ubuntu/code/nxhk/backend && php artisan schedule:run >> /dev/null 2>&1" > /etc/cron.d/laravel
+RUN echo "* * * * * root cd /home/ubuntu/code/demo/backend && php artisan schedule:run >> /dev/null 2>&1" > /etc/cron.d/laravel
 RUN chmod 0644 /etc/cron.d/laravel
 
 # for bind-address
