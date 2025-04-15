@@ -29,53 +29,32 @@ upstream frontend {
 server {
         listen 80 default_server;
         listen [::]:80 default_server;
-        root /app/dist;
+        root /srv/backend/public;
         index index.html;
         server_name uat.demo;
 
-        # Cloned from SalesfloorAdmin of Prod
-        location ~ \.php$ {
-              include snippets/fastcgi-php.conf;
-              fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
-        }
-
-        # Uat
-        location ^~ /public/ {
-                alias /var/www/html/backend/public/;
-        }
-
-        location ^~ /uploads/ {
-                ## In uat, /var/www/html/backend/public/uploads -> /home/ubuntu/code/demo/backend/storage/app/public/uploads
-                # alias /var/www/html/backend/public/uploads/;
-                alias /var/www/html/backend/public/storage/uploads/;
-        }
-
-        location ^~ /export_csv/ {
-                alias /var/www/html/backend/public/export_csv/;
-        }
-
-
-        # 修改 /v1 位置块
-        location ^~ /v1 {
-            proxy_pass http://backend;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_http_version 1.1;
-            proxy_set_header Connection "";
-        }
 
         # 修改 /adminer481.php 位置块
-        location ^~ /adminer481.php {
+        location ^~ "/adminer481.php" {
             root /var/www/html/backend/public;
             include snippets/fastcgi-php.conf;
             fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-            fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+            fastcgi_pass unix:/var/run/php/php7.3-fpm.sock;
         }
 
         location / {
-                try_files $uri $uri/ /index.html @frontend_proxy;
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        location ~ \.php$ {
+            include /etc/nginx/fastcgi_params;
+            # fastcgi_pass 127.0.0.1:9000;
+            fastcgi_pass unix:/var/run/php/php7.3-fpm.sock;
+            fastcgi_index index.php;
+            # fastcgi_param FUEL_ENV "production";
+            # fastcgi_param FUEL_ENV "staging";
+            fastcgi_param FUEL_ENV "development";
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         }
 
         # let 404 error to frontend
@@ -95,74 +74,6 @@ server {
         }
 }
 
-# Default server configuration
-#
-server {
-        listen 8080 default_server;
-        listen [::]:8080 default_server;
-
-        root /app/dist;
-
-        index index.html index.php index.htm index.nginx-debian.html;
-
-        server_name dev.uat.demo;
-
-        location ~ \.php$ {
-              include snippets/fastcgi-php.conf;
-              fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
-        }
-
-        location ^~ /public/ {
-                alias /var/www/html/backend/public/;
-        }
-
-        location ^~ /uploads/ {
-                ## In uat, /var/www/html/backend/public/uploads -> /home/ubuntu/code/demo/backend/storage/app/public/uploads
-                alias /var/www/html/backend/public/uploads/;
-        }
-
-        location ^~ /export_csv/ {
-                alias /var/www/html/backend/public/export_csv/;
-        }
-
-        location ^~ /v1 {
-            proxy_pass http://backend;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_http_version 1.1;
-            proxy_set_header Connection "";
-        }
-
-        location ^~ /adminer481.php {
-            root /var/www/html/backend/public;
-            include snippets/fastcgi-php.conf;
-            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-            fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
-        }
-
-        location / {
-            root /app/dist;
-            index index.html;
-            try_files $uri /$uri @frontend_proxy;
-        }
-
-        error_page 403 /403;
-        error_page 404 /404;
-        error_page 500 /500;
-
-        location @frontend_proxy {
-            proxy_pass http://frontend;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_http_version 1.1;
-            proxy_set_header Connection "";
-        }
-
-}
 
 # Virtual Host configuration for example.com
 #
