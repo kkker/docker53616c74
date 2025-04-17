@@ -3,7 +3,7 @@ FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
-ENV PHP_VERSION=8.3
+ENV PHP_VERSION=7.3
 
 
 # Install required packages

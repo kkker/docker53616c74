@@ -165,7 +165,7 @@ function demo_script {
     # For upload files, ref. to backend/config/filesystems.php
     cd /home/ubuntu/code/demo/backend && php artisan storage:link
 
-    service php8.3-fpm start
+    service php7.3-fpm start
     service cron start
     /usr/bin/python3 /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
 }
