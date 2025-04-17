@@ -125,10 +125,11 @@ RUN if ! grep -q "^ubuntu:" /etc/passwd; then \
 COPY sudoers.d/* /etc/sudoers.d/
 RUN chmod 0440 /etc/sudoers.d/*
 
-# Made symbolic links in UAT
+# Made symbolic links
 RUN ln -s /home/ubuntu/code/demo/backend /var/www/html/backend
 RUN ln -s /home/ubuntu/code/demo/frontend /var/www/html/frontend
 RUN ln -s /home/ubuntu/code/demo/frontend /app
+RUN ln -s /home/ubuntu/code/demo/backend /srv
 
 RUN usermod -aG ubuntu www-data
 
