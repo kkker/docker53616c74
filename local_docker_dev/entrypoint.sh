@@ -163,7 +163,7 @@ fi
 function demo_script {
 
     # For upload files, ref. to backend/config/filesystems.php
-    cd /home/ubuntu/code/demo/backend && php artisan storage:link
+    # cd /home/ubuntu/code/demo/backend && php artisan storage:link
 
     service php7.3-fpm start
     service cron start
