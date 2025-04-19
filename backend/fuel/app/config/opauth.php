@@ -25,12 +25,12 @@ return array(
      * eg. if Opauth is reached via http://example.org/auth/, path is '/auth/'.
      * if Opauth is reached via http://auth.example.org/, path is '/'.
      */
-    'path' => '/auth/',
+    'path' => '/auth/login/',
     
     /**
      * Uncoment if you would like to view debug messages.
      */
-     //'debug' => true,
+     'debug' => true,
      
      /**
       * Callback URL: redirected to after authentication, successful or otherwise.
